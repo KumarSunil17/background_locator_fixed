@@ -4,4 +4,5 @@ import java.util.HashMap
 
 interface LocationUpdateListener {
     fun onLocationUpdated(location: HashMap<Any, Any>?)
+    fun onStatusChanged(provider:String?, status:Int?)
 }

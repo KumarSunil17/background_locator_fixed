@@ -45,6 +45,16 @@ void callbackDispatcher() {
       if (disposeCallback != null) {
         disposeCallback();
       }
+    } else if (Keys.BCM_PROVIDER_UPDATED == call.method) {
+      final Map<dynamic, dynamic> args = call.arguments;
+      print(
+        "BCM_PROVIDER_UPDATED ${args}",
+      );
+      // final Function? disposeCallback = PluginUtilities.getCallbackFromHandle(
+      //     CallbackHandle.fromRawHandle(args[Keys.ARG_DISPOSE_CALLBACK]));
+      // if (disposeCallback != null) {
+      //   disposeCallback();
+      // }
     }
   });
   _backgroundChannel.invokeMethod(Keys.METHOD_SERVICE_INITIALIZED);

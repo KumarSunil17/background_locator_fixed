@@ -2,10 +2,15 @@ package yukams.app.background_locator_2.provider
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.location.*
 
-class GoogleLocationProviderClient(context: Context, override var listener: LocationUpdateListener?) : BLLocationProvider {
-    private val client: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+class GoogleLocationProviderClient(
+    context: Context,
+    override var listener: LocationUpdateListener?
+) : BLLocationProvider {
+    private val client: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
     private val locationCallback = LocationListener(listener)
 
     override fun removeLocationUpdates() {
@@ -33,5 +38,13 @@ class GoogleLocationProviderClient(context: Context, override var listener: Loca
 private class LocationListener(val listener: LocationUpdateListener?) : LocationCallback() {
     override fun onLocationResult(location: LocationResult) {
         listener?.onLocationUpdated(LocationParserUtil.getLocationMapFromLocation(location))
+    }
+
+    override fun onLocationAvailability(p0: LocationAvailability) {
+        super.onLocationAvailability(p0)
+        listener?.onStatusChanged("provider", if (p0.isLocationAvailable) 1 else 0)
+        //listener?.onStatusChanged("provider",p0?1:0)
+
+        Log.d("TAG", "onLocationAvailability: ${p0}")
     }
 }

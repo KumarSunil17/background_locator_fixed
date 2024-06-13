@@ -146,6 +146,8 @@ class Keys {
 
         @JvmStatic
         val BCM_SEND_LOCATION = "BCM_SEND_LOCATION"
+        @JvmStatic
+        val BCM_PROVIDER_UPDATED = "BCM_PROVIDER_UPDATED"
 
         @JvmStatic
         val BCM_NOTIFICATION_CLICK = "BCM_NOTIFICATION_CLICK"

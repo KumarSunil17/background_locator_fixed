@@ -7,10 +7,14 @@ import android.location.LocationListener
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
 import android.os.Bundle
+import android.util.Log
 
-class AndroidLocationProviderClient(context: Context, override var listener: LocationUpdateListener?) : BLLocationProvider, LocationListener {
+class AndroidLocationProviderClient(
+    context: Context,
+    override var listener: LocationUpdateListener?
+) : BLLocationProvider, LocationListener {
     private val client: LocationManager? =
-            ContextCompat.getSystemService(context, LocationManager::class.java)
+        ContextCompat.getSystemService(context, LocationManager::class.java)
 
     private var overrideLocation: Boolean = false
     private var timeOfLastLocation: Long = 0L
@@ -27,16 +31,24 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
         var networkLocation: Location? = null
         timeBetweenLocation = request.interval
         if (client?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true) {
-            client.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    request.interval,
-                    request.distanceFilter,
-                    this)
+            client.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                request.interval,
+                request.distanceFilter,
+                this
+            )
+        }else{
+             onProviderDisabled(LocationManager.GPS_PROVIDER);
         }
         if (client?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true) {
-            client.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    request.interval,
-                    request.distanceFilter,
-                    this)
+            client.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                request.interval,
+                request.distanceFilter,
+                this
+            )
+        }else{
+            onProviderDisabled(LocationManager.NETWORK_PROVIDER);
         }
         gpsLocation = client?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
         networkLocation = client?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
@@ -51,6 +63,8 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
             onLocationChanged(gpsLocation)
         } else if (networkLocation != null) {
             onLocationChanged(networkLocation)
+        }else{
+            onProviderDisabled(LocationManager.FUSED_PROVIDER);
         }
     }
 
@@ -61,9 +75,10 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
         // only minimal locations
         if (location.hasAccuracy()) {
             if (!location.accuracy.isNaN() &&
-                    location.accuracy != 0.0f &&
-                    !location.accuracy.isFinite() &&
-                    !location.accuracy.isInfinite()) {
+                location.accuracy != 0.0f &&
+                !location.accuracy.isFinite() &&
+                !location.accuracy.isInfinite()
+            ) {
                 overrideLocation = true
             }
         }
@@ -79,11 +94,19 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
 
     override fun onProviderDisabled(provider: String) {
         // nop
+        listener?.onStatusChanged(provider, 1)
     }
 
     override fun onProviderEnabled(provider: String) {
         // nop
+        listener?.onStatusChanged(provider, 0)
+
     }
-    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+
+        listener?.onStatusChanged(provider, status)
+
+    }
 
 }

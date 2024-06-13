@@ -20,8 +20,8 @@ import yukams.app.background_locator_2.pluggables.DisposePluggable
 import yukams.app.background_locator_2.pluggables.InitPluggable
 import yukams.app.background_locator_2.pluggables.Pluggable
 import yukams.app.background_locator_2.provider.*
-import java.util.HashMap
 import androidx.core.app.ActivityCompat
+import java.util.HashMap
 
 class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateListener, Service() {
     companion object {
@@ -55,7 +55,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                 ?: if (context != null) {
                     backgroundEngine = FlutterEngine(context)
                     backgroundEngine?.dartExecutor?.binaryMessenger
-                }else{
+                } else {
                     messenger
                 }
         }
@@ -139,13 +139,19 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.e("IsolateHolderService", "onStartCommand => intent.action : ${intent?.action}")
-        if(intent == null) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (intent == null) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 Log.e("IsolateHolderService", "app has crashed, stopping it")
                 stopSelf()
-            }
-            else {
+            } else {
                 return super.onStartCommand(intent, flags, startId)
             }
         }
@@ -155,6 +161,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                 isServiceRunning = false
                 shutdownHolderService()
             }
+
             ACTION_START == intent?.action -> {
                 if (isServiceRunning) {
                     isServiceRunning = false
@@ -166,6 +173,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                     startHolderService(intent)
                 }
             }
+
             ACTION_UPDATE_NOTIFICATION == intent?.action -> {
                 if (isServiceRunning) {
                     updateNotification(intent)
@@ -271,6 +279,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                 Keys.METHOD_SERVICE_INITIALIZED -> {
                     isServiceRunning = true
                 }
+
                 else -> result.notImplemented()
             }
 
@@ -324,6 +333,26 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
             }
         } catch (e: Exception) {
 
+        }
+    }
+
+    override fun onStatusChanged(provider: String?, status: Int?) {
+        if (backgroundEngine != null) {
+            context?.let {
+                val backgroundChannel =
+                    MethodChannel(
+                        getBinaryMessenger(it)!!,
+                        Keys.BACKGROUND_CHANNEL_ID
+                    )
+                val map: HashMap<String, Any?> = HashMap()
+                map.put("status", status)
+                map.put("provider", provider)
+                Handler(it.mainLooper)
+                    .post {
+                        Log.d("plugin", "onStatusChanged $map")
+                        backgroundChannel.invokeMethod(Keys.BCM_PROVIDER_UPDATED, map)
+                    }
+            }
         }
     }
 
