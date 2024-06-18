@@ -12,6 +12,9 @@ class Keys {
         val CALLBACK_HANDLE_KEY = "CALLBACK_HANDLE_KEY"
 
         @JvmStatic
+        val STATUS_CALLBACK_HANDLE_KEY = "statusChanged"
+
+        @JvmStatic
         val NOTIFICATION_CALLBACK_HANDLE_KEY = "NOTIFICATION_CALLBACK_HANDLE_KEY"
 
         @JvmStatic
@@ -58,6 +61,9 @@ class Keys {
 
         @JvmStatic
         val ARG_DISPOSE_CALLBACK = "disposeCallback"
+
+        @JvmStatic
+        val ARG_STATUS_CHANGED_CALLBACK = "statusChanged"
 
         @JvmStatic
         val ARG_IS_MOCKED = "is_mocked"
@@ -148,6 +154,9 @@ class Keys {
         val BCM_SEND_LOCATION = "BCM_SEND_LOCATION"
         @JvmStatic
         val BCM_PROVIDER_UPDATED = "BCM_PROVIDER_UPDATED"
+
+        @JvmStatic
+        val BCM_STATUS_UPDATED = "BCM_STATUS_UPDATED"
 
         @JvmStatic
         val BCM_NOTIFICATION_CLICK = "BCM_NOTIFICATION_CLICK"

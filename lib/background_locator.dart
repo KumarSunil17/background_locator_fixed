@@ -27,6 +27,7 @@ class BackgroundLocator {
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
       {void Function(Map<String, dynamic>)? initCallback,
+      void Function(Map<String, dynamic>)? onProviderStatusUpdated,
       Map<String, dynamic> initDataCallback = const {},
       void Function()? disposeCallback,
       bool autoStop = false,
@@ -42,6 +43,7 @@ class BackgroundLocator {
         initDataCallback: initDataCallback,
         disposeCallback: disposeCallback,
         androidSettings: androidSettings,
+        onProviderStatusUpdated: onProviderStatusUpdated,
         iosSettings: iosSettings);
 
     await _channel.invokeMethod(

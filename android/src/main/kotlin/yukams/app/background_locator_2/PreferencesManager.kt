@@ -30,7 +30,15 @@ class PreferencesManager {
                     .putLong(Keys.ARG_CALLBACK,
                             callback.toLong())
                     .apply()
-
+            if (map[Keys.ARG_STATUS_CHANGED_CALLBACK] as? Long != null) {
+                val statusCallback = map[Keys.ARG_STATUS_CHANGED_CALLBACK] as Number
+                sharedPreferences.edit()
+                    .putLong(
+                        Keys.ARG_STATUS_CHANGED_CALLBACK,
+                        statusCallback.toLong()
+                    )
+                    .apply()
+            }
             if (map[Keys.ARG_NOTIFICATION_CALLBACK] as? Long != null) {
                 sharedPreferences.edit()
                         .putLong(Keys.ARG_NOTIFICATION_CALLBACK,
@@ -107,6 +115,7 @@ class PreferencesManager {
 
             result[Keys.ARG_CALLBACK_DISPATCHER] = sharedPreferences.getLong(Keys.ARG_CALLBACK_DISPATCHER, 0)
             result[Keys.ARG_CALLBACK] = sharedPreferences.getLong(Keys.ARG_CALLBACK, 0)
+            result[Keys.ARG_STATUS_CHANGED_CALLBACK] = sharedPreferences.getLong(Keys.ARG_STATUS_CHANGED_CALLBACK, 0)
 
             if (sharedPreferences.contains(Keys.ARG_NOTIFICATION_CALLBACK)) {
                 result[Keys.ARG_NOTIFICATION_CALLBACK] =

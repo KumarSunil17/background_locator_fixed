@@ -8,13 +8,23 @@ import 'package:background_locator_2/settings/android_settings.dart';
 import 'package:background_locator_2/settings/ios_settings.dart';
 import 'package:background_locator_2/settings/locator_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:location_permissions/location_permissions.dart';
 
 import 'file_manager.dart';
 import 'location_callback_handler.dart';
 import 'location_service_repository.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.red,
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+  runApp(MyApp());
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -140,17 +150,21 @@ class _MyAppState extends State<MyApp> {
     );
 
     return MaterialApp(
+      theme:
+          ThemeData(colorSchemeSeed: Colors.red, brightness: Brightness.light),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter background Locator'),
         ),
-        body: Container(
-          width: double.maxFinite,
-          padding: const EdgeInsets.all(22),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[start, stop, clear, status, log],
+        body: SafeArea(
+          child: Container(
+            width: double.maxFinite,
+            padding: const EdgeInsets.all(22),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[start, stop, clear, status, log],
+              ),
             ),
           ),
         ),
@@ -208,6 +222,8 @@ class _MyAppState extends State<MyApp> {
     Map<String, dynamic> data = {'countInit': 1};
     return await BackgroundLocator.registerLocationUpdate(
         LocationCallbackHandler.callback,
+        onProviderStatusUpdated:
+            LocationCallbackHandler.onProviderStatusUpdated,
         initCallback: LocationCallbackHandler.initCallback,
         initDataCallback: data,
         disposeCallback: LocationCallbackHandler.disposeCallback,

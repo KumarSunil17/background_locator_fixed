@@ -337,23 +337,55 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onStatusChanged(provider: String?, status: Int?) {
-        if (backgroundEngine != null) {
+        try {
             context?.let {
-                val backgroundChannel =
-                    MethodChannel(
-                        getBinaryMessenger(it)!!,
-                        Keys.BACKGROUND_CHANNEL_ID
-                    )
-                val map: HashMap<String, Any?> = HashMap()
-                map.put("status", status)
-                map.put("provider", provider)
-                Handler(it.mainLooper)
-                    .post {
-                        Log.d("plugin", "onStatusChanged $map")
-                        backgroundChannel.invokeMethod(Keys.BCM_PROVIDER_UPDATED, map)
-                    }
+                FlutterInjector.instance().flutterLoader().ensureInitializationComplete(
+                    it, null
+                )
             }
+
+            //https://github.com/flutter/plugins/pull/1641
+            //https://github.com/flutter/flutter/issues/36059
+            //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
+            // new version of flutter can not invoke method from background thread
+            if (provider != null) {
+                val callback =
+                    context?.let {
+                        PreferencesManager.getCallbackHandle(
+                            it,
+                            Keys.STATUS_CALLBACK_HANDLE_KEY
+                        )
+                    } as Long
+
+                val result: HashMap<Any, Any> =
+                    hashMapOf(
+                        Keys.ARG_STATUS_CHANGED_CALLBACK to callback,
+                        Keys.ARG_PROVIDER to provider,
+                        Keys.ARG_SETTINGS to status as Any
+                    )
+
+                if (backgroundEngine != null) {
+                    context?.let {
+                        val backgroundChannel =
+                            MethodChannel(
+                                getBinaryMessenger(it)!!,
+                                Keys.BACKGROUND_CHANNEL_ID
+                            )
+                        Handler(it.mainLooper)
+                            .post {
+                                Log.d("plugin", "onStatusChanged $result")
+                                backgroundChannel.invokeMethod(Keys.BCM_STATUS_UPDATED, result)
+                            }
+
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.d("plugin", e.printStackTrace().toString())
+
         }
+
+
     }
 
     private fun sendLocationEvent(result: HashMap<Any, Any>) {

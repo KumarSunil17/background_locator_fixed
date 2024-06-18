@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,10 +14,13 @@ void callbackDispatcher() {
   WidgetsFlutterBinding.ensureInitialized();
 
   _backgroundChannel.setMethodCallHandler((MethodCall call) async {
+    print(
+        "METHOD ${call.method} ${call.arguments} ${(Keys.BCM_PROVIDER_UPDATED == call.method)}");
     if (Keys.BCM_SEND_LOCATION == call.method) {
       final Map<dynamic, dynamic> args = call.arguments;
       final Function? callback = PluginUtilities.getCallbackFromHandle(
           CallbackHandle.fromRawHandle(args[Keys.ARG_CALLBACK]))!;
+
       final LocationDto location =
           LocationDto.fromJson(args[Keys.ARG_LOCATION]);
       if (callback != null) {
@@ -45,16 +49,17 @@ void callbackDispatcher() {
       if (disposeCallback != null) {
         disposeCallback();
       }
-    } else if (Keys.BCM_PROVIDER_UPDATED == call.method) {
+    } else if (Keys.BCM_STATUS_UPDATED == call.method) {
       final Map<dynamic, dynamic> args = call.arguments;
+
+      final Function? onProviderStatusUpdated =
+          PluginUtilities.getCallbackFromHandle(CallbackHandle.fromRawHandle(
+              args[Keys.ARG_STATUS_CHANGED_CALLBACK]));
       print(
-        "BCM_PROVIDER_UPDATED ${args}",
-      );
-      // final Function? disposeCallback = PluginUtilities.getCallbackFromHandle(
-      //     CallbackHandle.fromRawHandle(args[Keys.ARG_DISPOSE_CALLBACK]));
-      // if (disposeCallback != null) {
-      //   disposeCallback();
-      // }
+          "METHOD_1 ${call.method} ${call.arguments} ${args[Keys.ARG_STATUS_CHANGED_CALLBACK]} $onProviderStatusUpdated");
+      if (onProviderStatusUpdated != null) {
+        onProviderStatusUpdated(Map<String, dynamic>.from(call.arguments));
+      }
     }
   });
   _backgroundChannel.invokeMethod(Keys.METHOD_SERVICE_INITIALIZED);

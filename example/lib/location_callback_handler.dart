@@ -31,4 +31,10 @@ class LocationCallbackHandler {
   static Future<void> notificationCallback() async {
     print('***notificationCallback');
   }
+
+  @pragma('vm:entry-point')
+  static Future<void> onProviderStatusUpdated(
+      Map<String, dynamic> params) async {
+    print('***onProviderStatusUpdated $params');
+  }
 }
